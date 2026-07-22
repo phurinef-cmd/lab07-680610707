@@ -6,7 +6,7 @@
 
 ชื่อ-สกุล : ภูรินท์ แบนสุภา
 
-Vercel URL : https://lab07-680610707.vercel.app
+Vercel URL : https://lab07-680610707-nu.vercel.app
 
 ---
 
