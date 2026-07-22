@@ -26,37 +26,36 @@ app.get("/", (req: Request, res: Response) => {
 
 // GET /students
 // get students (by program)
-app.get("/students", (req: Request, res: Response) => {
+app.get("/api/students", (req: Request, res: Response) => {
   try {
-    const program = req.query.program;
-
+    const { studentId, program } = req.query;
+    let result = students;
+    if (studentId) {
+      result = result.filter(
+        (student) => student.studentId === studentId
+      );
+    }
     if (program) {
-      let filtered_students = students.filter(
+      result = result.filter(
         (student) => student.program === program
       );
-      return res.json({
-        success: true,
-        data: filtered_students,
-      });
-    } else {
-      return res.json({
-        success: true,
-        count: students.length,
-        data: students,
-      });
     }
+    return res.json({
+      success: true,
+      count: result.length,
+      data: result,
+    });
   } catch (err) {
     return res.json({
       success: false,
-      message: "Something is wrong, please try again",
-      error: err,
+      message: "Something is wrong",
     });
   }
 });
 
 // POST /students, body = {new student data}
 // add a new student
-app.post("/students", (req: Request, res: Response) => {
+app.post("/api/students", (req: Request, res: Response) => {
   try {
     const body = req.body as Student;
 
@@ -103,7 +102,7 @@ app.post("/students", (req: Request, res: Response) => {
 
 // PUT /students, body = {studentId}
 // Update specified student
-app.put("/students", (req: Request, res: Response) => {
+app.put("/api/students", (req: Request, res: Response) => {
   try {
     const body = req.body as Student;
 
@@ -149,13 +148,39 @@ app.put("/students", (req: Request, res: Response) => {
 });
 
 // DELETE /students, body = {studentId}
-app.delete("/students", (req: Request, res: Response) => {
-  res.json({
-    message: "Implement this!"
-  })
+app.delete("/api/students", (req: Request, res: Response) => {
+  const body = req.body;
+  const result = zStudentDeleteBody.safeParse(body);
+  if (!result.success) {
+    return res.status(400).json({
+      success: false,
+      message: result.error.issues[0].message,
+    });
+  }
+  const index = students.findIndex(
+    (student) => student.studentId === body.studentId
+  );
+  if (index === -1) {
+    return res.status(404).json({
+      success: false,
+      message: "Student not found",
+    });
+  }
+  students.splice(index, 1);
+  return res.json({
+    success: true,
+    message: "Student deleted successfully",
+  });
 });
 
 // GET /api/me
+app.get("/api/me", (req: Request, res: Response) => {
+  res.json({
+    studentId: "680610707",
+    firstName: "Phurin",
+    lastName: "Bansupa",
+  });
+});
 
 app.listen(port, async () => {
   console.log(`🚀 Server running on http://localhost:${port}`);
