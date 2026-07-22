@@ -205,8 +205,8 @@ app.delete("/api/students", (req: Request, res: Response) => {
 app.get('/api/me', (req: Request, res: Response) => {
   res.status(200).json({
     "ok": true,
-    "fullName": "Chonlakorn Theerasatiankul",
-    "studentId": "680610665"
+    "fullName": "Phurin Bansupa",
+    "studentId": "680610707"
   })
 })
 
