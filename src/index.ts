@@ -28,27 +28,41 @@ app.get("/", (req: Request, res: Response) => {
 // get students (by program)
 app.get("/api/students", (req: Request, res: Response) => {
   try {
-    const { studentId, program } = req.query;
-    let result = students;
-    if (studentId) {
-      result = result.filter(
-        (student) => student.studentId === studentId
-      );
+    const program = req.query.program;
+    const studentId = req.query.studentId;
+
+    if (!program && !studentId) {
+      return res.json({
+        success: true,
+        students: students,
+      });
     }
+
+    let filteredStudents: Student[] = students;
+
     if (program) {
-      result = result.filter(
+      filteredStudents = filteredStudents.filter(
         (student) => student.program === program
       );
     }
-    return res.json({
-      success: true,
-      count: result.length,
-      data: result,
+
+    if (studentId) {
+      filteredStudents = filteredStudents.filter(
+        (student) => student.studentId === studentId
+      );
+    }
+
+    return res.status(200).json({
+      ok: true,
+      students: filteredStudents,
     });
+
+
   } catch (err) {
-    return res.json({
-      success: false,
-      message: "Something is wrong",
+    return res.status(500).json({
+      ok: false,
+      message: "Something is wrong, please try again",
+      error: err,
     });
   }
 });
@@ -149,38 +163,52 @@ app.put("/api/students", (req: Request, res: Response) => {
 
 // DELETE /students, body = {studentId}
 app.delete("/api/students", (req: Request, res: Response) => {
-  const body = req.body;
-  const result = zStudentDeleteBody.safeParse(body);
-  if (!result.success) {
-    return res.status(400).json({
-      success: false,
-      message: result.error.issues[0].message,
+  try {
+    const body = req.body;
+
+    const validate = zStudentDeleteBody.safeParse(body);
+
+    if (!validate.success) {
+      return res.status(400).json({
+        success: false,
+        errors: `Student Id must contain 9 characters`,
+      });
+    }
+
+    const foundIndex = students.findIndex(
+      (student) => student.studentId === body.studentId
+    );
+
+    if (foundIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Student ID does not exist",
+      });
+    }
+
+    students.splice(foundIndex, 1);
+
+    res.json({
+      ok: true,
+      message: `Student Id ${body.studentId} has been deleted`
+    });
+  } catch (err) {
+    return res.status(500).json({
+      ok: false,
+      message: "Something is wrong, please try again",
+      error: err,
     });
   }
-  const index = students.findIndex(
-    (student) => student.studentId === body.studentId
-  );
-  if (index === -1) {
-    return res.status(404).json({
-      success: false,
-      message: "Student not found",
-    });
-  }
-  students.splice(index, 1);
-  return res.json({
-    success: true,
-    message: "Student deleted successfully",
-  });
 });
 
 // GET /api/me
-app.get("/api/me", (req: Request, res: Response) => {
-  res.json({
-    studentId: "680610707",
-    firstName: "Phurin",
-    lastName: "Bansupa",
-  });
-});
+app.get('/api/me', (req: Request, res: Response) => {
+  res.status(200).json({
+    "ok": true,
+    "fullName": "Chonlakorn Theerasatiankul",
+    "studentId": "680610665"
+  })
+})
 
 app.listen(port, async () => {
   console.log(`🚀 Server running on http://localhost:${port}`);

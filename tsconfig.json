@@ -7,8 +7,6 @@
     "types": ["node"],
     "rootDir": ".",
     "outDir": "./dist",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
     "paths": {
       "@src/*": ["./src/*"],
       "@db/*": ["./src/db/*"],
